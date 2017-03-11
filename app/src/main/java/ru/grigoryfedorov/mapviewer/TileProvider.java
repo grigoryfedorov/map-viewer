@@ -10,8 +10,6 @@ class TileProvider {
     private static final int TILE_WIDTH = TILE_SIZE;
     private static final int TILE_HEIGHT = TILE_SIZE;
 
-    private static final int ZOOM = 16;
-
     private final Callback callback;
 
     private TileCache tileCache;
@@ -51,7 +49,7 @@ class TileProvider {
     }
 
     private void requestTile(final Tile tile) {
-        loader.loadBitmap("http://b.tile.opencyclemap.org/cycle/" + ZOOM + "/" + tile.getX() + "/" + tile.getY() + ".png", new BitmapLoader.Callback() {
+        loader.loadBitmap("http://b.tile.opencyclemap.org/cycle/" + tile.getZoom() + "/" + tile.getX() + "/" + tile.getY() + ".png", new BitmapLoader.Callback() {
             @Override
             public void onTileLoaded(Bitmap bitmap) {
                 tileCache.put(tile, bitmap);

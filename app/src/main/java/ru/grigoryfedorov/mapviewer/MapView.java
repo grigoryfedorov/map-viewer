@@ -22,6 +22,7 @@ public class MapView extends View implements TileProvider.Callback {
     private int tilesCountX;
     private int tilesCountY;
 
+    private static final int ZOOM = 16;
     private static final long START_TILE_X = 33198;
     private static final long START_TILE_Y = 22539;
 
@@ -119,7 +120,7 @@ public class MapView extends View implements TileProvider.Callback {
 
         for (int x = 0; x < tilesCountX; x++) {
             for (int y = 0; y < tilesCountY; y++) {
-                Bitmap bitmap = tileProvider.getTile(Tile.getTile(startTileX + x, startTileY + y));
+                Bitmap bitmap = tileProvider.getTile(Tile.getTile(ZOOM, startTileX + x, startTileY + y));
 
                 float left = offsetX + x * tileWidth;
                 float top =  offsetY + y * tileHeight;
