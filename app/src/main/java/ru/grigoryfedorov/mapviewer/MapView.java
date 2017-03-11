@@ -11,22 +11,13 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.OverScroller;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.animation.GlideAnimation;
-import com.bumptech.glide.request.target.SimpleTarget;
 
-
-public class MapView extends View {
+public class MapView extends View implements TileProvider.Callback {
     private static final String TAG = MapView.class.getSimpleName();
 
-    public static final int TILE_SIZE = 256;
-    public static final int TILE_WIDTH = TILE_SIZE;
-    public static final int TILE_HEIGHT = TILE_SIZE;
-
-    private TileCache tileCache;
-    private PlaceholderProvider placeholderProvider;
 
     private GestureDetector gestureDetector;
+    private TileProvider tileProvider;
 
     private int tilesCountX;
     private int tilesCountY;
@@ -34,10 +25,13 @@ public class MapView extends View {
     private static final long START_TILE_X = 33198;
     private static final long START_TILE_Y = 22539;
 
-    private double currentX = START_TILE_X * TILE_WIDTH;
-    private double currentY = START_TILE_Y * TILE_HEIGHT;
+    private double currentX;
+    private double currentY;
 
     private OverScroller scroller;
+
+    private int tileWidth;
+    private int tileHeight;
 
     public MapView(Context context) {
         this(context, null, 0);
@@ -50,8 +44,13 @@ public class MapView extends View {
     public MapView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
 
-        tileCache = new LruTileCache(128);
-        placeholderProvider = new PlaceholderProvider(TILE_WIDTH, TILE_HEIGHT);
+        tileProvider = new TileProvider(getContext(), this);
+
+        tileWidth = tileProvider.getTileWidth();
+        tileHeight = tileProvider.getTileHeight();
+
+        currentX = START_TILE_X * tileWidth;
+        currentY = START_TILE_Y * tileHeight;
 
         scroller = new OverScroller(context);
 
@@ -98,18 +97,7 @@ public class MapView extends View {
         return gestureDetector.onTouchEvent(event);
     }
 
-    void requestTile(final long x, final long y) {
-        Glide.with(getContext())
-                .load("http://b.tile.opencyclemap.org/cycle/16/" + x + "/" + y + ".png")
-                .asBitmap()
-                .into(new SimpleTarget<Bitmap>(TILE_WIDTH, TILE_HEIGHT) {
-                    @Override
-                    public void onResourceReady(Bitmap resource, GlideAnimation glideAnimation) {
-                        tileCache.put(Tile.getTile(x, y), resource);
-                        drawTileIfNeeded(x, y);
-                    }
-                });
-    }
+
 
     @Override
     protected void onDraw(Canvas canvas) {
@@ -122,24 +110,19 @@ public class MapView extends View {
         long currentLongX = Math.round(currentX);
         long currentLongY = Math.round(currentY);
 
-        long startTileX = currentLongX / TILE_WIDTH;
-        long startTileY = currentLongY / TILE_HEIGHT;
+        long startTileX = currentLongX / tileWidth;
+        long startTileY = currentLongY / tileHeight;
 
 
-        int offsetX = (int) -(currentLongX % TILE_WIDTH);
-        int offsetY = (int) -(currentLongY % TILE_HEIGHT);
+        int offsetX = (int) -(currentLongX % tileWidth);
+        int offsetY = (int) -(currentLongY % tileHeight);
 
         for (int x = 0; x < tilesCountX; x++) {
             for (int y = 0; y < tilesCountY; y++) {
-                Bitmap bitmap = tileCache.get(Tile.getTile(startTileX + x, startTileY + y));
+                Bitmap bitmap = tileProvider.getTile(Tile.getTile(startTileX + x, startTileY + y));
 
-                if (bitmap == null) {
-                    requestTile(startTileX + x, startTileY + y);
-                    bitmap = placeholderProvider.getPlaceholderBitmap();
-                }
-
-                float left = offsetX + x * TILE_WIDTH;
-                float top =  offsetY + y * TILE_HEIGHT;
+                float left = offsetX + x * tileWidth;
+                float top =  offsetY + y * tileHeight;
 
                 canvas.drawBitmap(bitmap, left, top, null);
             }
@@ -147,34 +130,16 @@ public class MapView extends View {
     }
 
 
-    private void drawTileIfNeeded(long tileX, long tileY) {
-        long currentLongX = Math.round(currentX);
-        long currentLongY = Math.round(currentY);
 
-        long startTileX = currentLongX / TILE_WIDTH;
-        long startTileY = currentLongY / TILE_HEIGHT;
-
-        if (tileX >= startTileX && tileX < startTileX + tilesCountX
-                && tileY >= startTileY
-                && tileY < startTileY + tilesCountY) {
-            int offsetX = (int) -(currentLongX % TILE_WIDTH);
-            int offsetY = (int) -(currentLongY % TILE_HEIGHT);
-
-            int left = (int) (offsetX + (tileX - startTileX) * TILE_WIDTH);
-            int top = (int) (offsetY + (tileY - startTileY) * TILE_HEIGHT);
-
-            invalidate(left, top, left + TILE_WIDTH, top + TILE_HEIGHT);
-        }
-    }
 
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
 
-        tilesCountX = getTileCount(w, TILE_WIDTH) + 2;
-        tilesCountY = getTileCount(h, TILE_HEIGHT) + 2;
+        tilesCountX = getTileCount(w, tileWidth) + 2;
+        tilesCountY = getTileCount(h, tileHeight) + 2;
 
-        tileCache.resize(tilesCountX * tilesCountY);
+        tileProvider.onSizeChanged(tilesCountX, tilesCountY);
 
         Log.d(TAG, "onSizeChanged w " + w + " h " + h + " oldw " + oldw + " oldh " + oldh + " tile count " + tilesCountX + " x " + tilesCountY);
 
@@ -182,5 +147,31 @@ public class MapView extends View {
 
     int getTileCount(int viewSize, int tileSize) {
         return viewSize / tileSize + (viewSize % tileSize == 0 ? 0 : 1);
+    }
+
+    @Override
+    public void onTileUpdated(Tile tile) {
+        drawTileIfNeeded(tile);
+    }
+
+    private void drawTileIfNeeded(Tile tile) {
+        long currentLongX = Math.round(currentX);
+        long currentLongY = Math.round(currentY);
+
+        long startTileX = currentLongX / tileWidth;
+        long startTileY = currentLongY / tileHeight;
+
+        if (tile.getX() >= startTileX
+                && tile.getX() < startTileX + tilesCountX
+                && tile.getY() >= startTileY
+                && tile.getY() < startTileY + tilesCountY) {
+            int offsetX = (int) -(currentLongX % tileWidth);
+            int offsetY = (int) -(currentLongY % tileHeight);
+
+            int left = (int) (offsetX + (tile.getX() - startTileX) * tileWidth);
+            int top = (int) (offsetY + (tile.getY() - startTileY) * tileHeight);
+
+            invalidate(left, top, left + tileWidth, top + tileHeight);
+        }
     }
 }
