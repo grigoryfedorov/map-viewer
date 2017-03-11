@@ -24,7 +24,8 @@ class TileProvider {
     }
 
     TileProvider(Context context, Callback callback) {
-        this.loader = new GlideLoader(context, TILE_WIDTH, TILE_HEIGHT);
+//        this.loader = new GlideLoader(context, TILE_WIDTH, TILE_HEIGHT);
+        this.loader = new UrlConnectionLoader();
         this.callback = callback;
         tileCache = new LruTileCache(128);
         placeholderProvider = new PlaceholderProvider(TILE_WIDTH, TILE_HEIGHT);

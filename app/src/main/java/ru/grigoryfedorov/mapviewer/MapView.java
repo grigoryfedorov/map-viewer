@@ -171,7 +171,7 @@ public class MapView extends View implements TileProvider.Callback {
             int left = (int) (offsetX + (tile.getX() - startTileX) * tileWidth);
             int top = (int) (offsetY + (tile.getY() - startTileY) * tileHeight);
 
-            invalidate(left, top, left + tileWidth, top + tileHeight);
+            postInvalidate(left, top, left + tileWidth, top + tileHeight);
         }
     }
 }
