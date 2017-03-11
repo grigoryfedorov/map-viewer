@@ -4,10 +4,6 @@ package ru.grigoryfedorov.mapviewer;
 import android.content.Context;
 import android.graphics.Bitmap;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.animation.GlideAnimation;
-import com.bumptech.glide.request.target.SimpleTarget;
-
 class TileProvider {
 
     private static final int TILE_SIZE = 256;
@@ -17,17 +13,18 @@ class TileProvider {
     private static final int ZOOM = 16;
 
     private final Callback callback;
-    private final Context context;
 
     private TileCache tileCache;
     private PlaceholderProvider placeholderProvider;
+
+    private BitmapLoader loader;
 
     interface Callback {
         void onTileUpdated(Tile tile);
     }
 
     TileProvider(Context context, Callback callback) {
-        this.context = context;
+        this.loader = new GlideLoader(context, TILE_WIDTH, TILE_HEIGHT);
         this.callback = callback;
         tileCache = new LruTileCache(128);
         placeholderProvider = new PlaceholderProvider(TILE_WIDTH, TILE_HEIGHT);
@@ -53,16 +50,13 @@ class TileProvider {
     }
 
     private void requestTile(final Tile tile) {
-        Glide.with(context)
-                .load("http://b.tile.opencyclemap.org/cycle/" + ZOOM + "/" + tile.getX() + "/" + tile.getY() + ".png")
-                .asBitmap()
-                .into(new SimpleTarget<Bitmap>(TILE_WIDTH, TILE_HEIGHT) {
-                    @Override
-                    public void onResourceReady(Bitmap resource, GlideAnimation glideAnimation) {
-                        tileCache.put(tile, resource);
-                        callback.onTileUpdated(tile);
-                    }
-                });
+        loader.loadBitmap("http://b.tile.opencyclemap.org/cycle/" + ZOOM + "/" + tile.getX() + "/" + tile.getY() + ".png", new BitmapLoader.Callback() {
+            @Override
+            public void onTileLoaded(Bitmap bitmap) {
+                tileCache.put(tile, bitmap);
+                callback.onTileUpdated(tile);
+            }
+        });
     }
 
     void onSizeChanged(int tilesCountX, int tilesCountY) {
