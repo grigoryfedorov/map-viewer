@@ -13,6 +13,7 @@ class TileProvider {
     private final Callback callback;
 
     private TileCache tileCache;
+    private PersistentCache persistentCache;
     private PlaceholderProvider placeholderProvider;
 
     private BitmapLoader loader;
@@ -26,6 +27,7 @@ class TileProvider {
         this.loader = new UrlConnectionLoader();
         this.callback = callback;
         tileCache = new LruTileCache(128);
+        persistentCache = new FileCache(context);
         placeholderProvider = new PlaceholderProvider(TILE_WIDTH, TILE_HEIGHT);
     }
 
@@ -41,8 +43,14 @@ class TileProvider {
         Bitmap bitmap = tileCache.get(tile);
 
         if (bitmap == null) {
-            requestTile(tile);
-            bitmap = placeholderProvider.getPlaceholderBitmap();
+            bitmap = persistentCache.get(tile);
+
+            if (bitmap == null) {
+                requestTile(tile);
+                bitmap = placeholderProvider.getPlaceholderBitmap();
+            } else {
+                tileCache.put(tile, bitmap);
+            }
         }
 
         return bitmap;
@@ -52,6 +60,7 @@ class TileProvider {
         loader.loadBitmap("http://b.tile.opencyclemap.org/cycle/" + tile.getZoom() + "/" + tile.getX() + "/" + tile.getY() + ".png", new BitmapLoader.Callback() {
             @Override
             public void onTileLoaded(Bitmap bitmap) {
+                persistentCache.put(tile, bitmap);
                 tileCache.put(tile, bitmap);
                 callback.onTileUpdated(tile);
             }
