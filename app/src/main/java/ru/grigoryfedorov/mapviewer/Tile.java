@@ -50,4 +50,13 @@ class Tile {
         result = 31 * result + (int) (y ^ (y >>> 32));
         return result;
     }
+
+    @Override
+    public String toString() {
+        return "Tile{" +
+                "zoom=" + zoom +
+                ", x=" + x +
+                ", y=" + y +
+                '}';
+    }
 }
