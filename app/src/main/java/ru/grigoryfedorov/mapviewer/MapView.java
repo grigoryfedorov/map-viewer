@@ -118,12 +118,25 @@ public class MapView extends View implements TileProvider.Callback {
         int offsetX = (int) -(currentLongX % tileWidth);
         int offsetY = (int) -(currentLongY % tileHeight);
 
+        int width = canvas.getWidth();
+        int height = canvas.getHeight();
+
         for (int x = 0; x < tilesCountX; x++) {
             for (int y = 0; y < tilesCountY; y++) {
-                Bitmap bitmap = tileProvider.getTile(Tile.getTile(ZOOM, startTileX + x, startTileY + y));
+
 
                 float left = offsetX + x * tileWidth;
                 float top =  offsetY + y * tileHeight;
+
+                if (left > width
+                        || top > height
+                        || left < -tileWidth
+                        || top < -tileHeight) {
+                    continue;
+                }
+
+
+                Bitmap bitmap = tileProvider.getTile(Tile.getTile(ZOOM, startTileX + x, startTileY + y));
 
                 canvas.drawBitmap(bitmap, left, top, null);
             }
