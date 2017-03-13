@@ -10,6 +10,14 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import ru.grigoryfedorov.mapviewer.bitmaploader.BitmapLoader;
+import ru.grigoryfedorov.mapviewer.bitmaploader.UrlConnectionLoader;
+import ru.grigoryfedorov.mapviewer.cache.memory.LinkedMapLruMemoryCache;
+import ru.grigoryfedorov.mapviewer.cache.memory.MemoryCache;
+import ru.grigoryfedorov.mapviewer.cache.persistent.FileCache;
+import ru.grigoryfedorov.mapviewer.cache.persistent.PersistentCache;
+import ru.grigoryfedorov.mapviewer.pool.BitmapPool;
+
 class TileProvider {
 
     private static final int TILE_SIZE = 256;
@@ -50,7 +58,7 @@ class TileProvider {
 
         executorService = Executors.newFixedThreadPool(1);
 
-        inProgress =Collections.newSetFromMap(new ConcurrentHashMap<Tile, Boolean>());
+        inProgress = Collections.newSetFromMap(new ConcurrentHashMap<Tile, Boolean>());
         planned = Collections.newSetFromMap(new ConcurrentHashMap<Tile, Boolean>());
     }
 
@@ -123,6 +131,6 @@ class TileProvider {
 
     void onSizeChanged(int tilesCountX, int tilesCountY) {
         memoryCache.resize(tilesCountX * tilesCountY);
-        executorService = Executors.newFixedThreadPool(2 * tilesCountX * tilesCountY);
+        executorService = Executors.newFixedThreadPool(tilesCountX * tilesCountY);
     }
 }

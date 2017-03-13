@@ -1,4 +1,4 @@
-package ru.grigoryfedorov.mapviewer;
+package ru.grigoryfedorov.mapviewer.pool;
 
 import android.graphics.Bitmap;
 import android.support.annotation.Nullable;
@@ -6,5 +6,5 @@ import android.support.annotation.Nullable;
 
 public interface BitmapPoolProvider {
     @Nullable
-    public Bitmap get();
+    Bitmap get();
 }

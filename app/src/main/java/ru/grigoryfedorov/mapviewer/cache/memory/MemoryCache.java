@@ -1,10 +1,13 @@
-package ru.grigoryfedorov.mapviewer;
+package ru.grigoryfedorov.mapviewer.cache.memory;
 
 
 import android.graphics.Bitmap;
 import android.support.annotation.Nullable;
 
-interface MemoryCache {
+import ru.grigoryfedorov.mapviewer.Tile;
+import ru.grigoryfedorov.mapviewer.pool.BitmapPoolConsumer;
+
+public interface MemoryCache {
 
     void put(Tile tile, Bitmap bitmap);
 

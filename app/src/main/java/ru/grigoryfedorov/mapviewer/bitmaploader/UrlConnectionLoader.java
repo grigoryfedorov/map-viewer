@@ -1,4 +1,4 @@
-package ru.grigoryfedorov.mapviewer;
+package ru.grigoryfedorov.mapviewer.bitmaploader;
 
 
 import android.graphics.Bitmap;
@@ -11,7 +11,10 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-class UrlConnectionLoader implements BitmapLoader {
+import ru.grigoryfedorov.mapviewer.BitmapOptionsProvider;
+import ru.grigoryfedorov.mapviewer.pool.BitmapPoolProvider;
+
+public class UrlConnectionLoader implements BitmapLoader {
     private static final String TAG = UrlConnectionLoader.class.getSimpleName();
 
     @Nullable

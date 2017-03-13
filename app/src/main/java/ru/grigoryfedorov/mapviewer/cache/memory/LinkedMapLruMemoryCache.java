@@ -1,4 +1,4 @@
-package ru.grigoryfedorov.mapviewer;
+package ru.grigoryfedorov.mapviewer.cache.memory;
 
 
 import android.graphics.Bitmap;
@@ -7,7 +7,10 @@ import android.support.annotation.Nullable;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-class LinkedMapLruMemoryCache implements MemoryCache {
+import ru.grigoryfedorov.mapviewer.Tile;
+import ru.grigoryfedorov.mapviewer.pool.BitmapPoolConsumer;
+
+public class LinkedMapLruMemoryCache implements MemoryCache {
 
     private final LinkedHashMap<Tile, Bitmap> map;
     private final Object lock = new Object();

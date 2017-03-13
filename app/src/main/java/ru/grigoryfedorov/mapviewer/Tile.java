@@ -1,7 +1,7 @@
 package ru.grigoryfedorov.mapviewer;
 
 
-class Tile {
+public class Tile {
     private final int zoom;
     private final int x;
     private final int y;
@@ -17,15 +17,15 @@ class Tile {
         this.y = y;
     }
 
-    int getZoom() {
+    public int getZoom() {
         return zoom;
     }
 
-    int getX() {
+    public int getX() {
         return x;
     }
 
-    int getY() {
+    public int getY() {
         return y;
     }
 

@@ -1,8 +1,8 @@
-package ru.grigoryfedorov.mapviewer;
+package ru.grigoryfedorov.mapviewer.pool;
 
 
 import android.graphics.Bitmap;
 
 public interface BitmapPoolConsumer {
-    public void add(Bitmap bitmap);
+    void add(Bitmap bitmap);
 }
