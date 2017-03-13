@@ -35,7 +35,7 @@ class TileProvider {
     TileProvider(Context context, Callback callback) {
         this.loader = new UrlConnectionLoader();
         this.callback = callback;
-        memoryCache = new AndroidLruMemoryCache(1);
+        memoryCache = new LinkedMapLruMemoryCache(16);
         persistentCache = new FileCache(context);
         placeholderProvider = new PlaceholderProvider(TILE_WIDTH, TILE_HEIGHT);
 
