@@ -26,6 +26,12 @@ public class MapView extends View implements TileProvider.Callback {
     private static final long START_TILE_X = 33198;
     private static final long START_TILE_Y = 22539;
 
+    private static final long MIN_TILE_X = 33148;
+    private static final long MIN_TILE_Y = 22489;
+
+    private static final long MAX_TILE_X = 33248;
+    private static final long MAX_TILE_Y = 22589;
+
     private double currentX;
     private double currentY;
 
@@ -33,6 +39,13 @@ public class MapView extends View implements TileProvider.Callback {
 
     private int tileWidth;
     private int tileHeight;
+
+    private long minX;
+    private long minY;
+
+    private long maxY;
+    private long maxX;
+
 
     public MapView(Context context) {
         this(context, null, 0);
@@ -52,6 +65,12 @@ public class MapView extends View implements TileProvider.Callback {
 
         currentX = START_TILE_X * tileWidth;
         currentY = START_TILE_Y * tileHeight;
+
+        minX = MIN_TILE_X * tileWidth;
+        minY = MIN_TILE_Y * tileHeight;
+
+        maxX = MAX_TILE_X * tileWidth;
+        maxY = MAX_TILE_Y * tileHeight;
 
         scroller = new OverScroller(context);
 
@@ -73,6 +92,8 @@ public class MapView extends View implements TileProvider.Callback {
                 currentX += distanceX;
                 currentY += distanceY;
 
+                checkBorders();
+
                 postInvalidateOnAnimation();
 
                 return true;
@@ -84,13 +105,31 @@ public class MapView extends View implements TileProvider.Callback {
 
 
                 scroller.forceFinished(true);
-                scroller.fling((int)currentX, (int)currentY, (int)-velocityX, (int)-velocityY, 0, 1000000000, 0, 1000000000);
+                scroller.fling((int)currentX, (int)currentY, (int)-velocityX, (int)-velocityY, (int) minX, (int) maxX, (int) minY, (int) maxY);
 
                 postInvalidateOnAnimation();
                 return true;
             }
         });
 
+    }
+
+    void checkBorders() {
+        if (currentX < minX) {
+            currentX = minX;
+        }
+
+        if (currentY < minY) {
+            currentY = minY;
+        }
+
+        if (currentX > maxX) {
+            currentX = maxX;
+        }
+
+        if (currentY > maxY) {
+            currentY = maxY;
+        }
     }
 
     @Override
