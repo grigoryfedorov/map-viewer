@@ -3,6 +3,7 @@ package ru.grigoryfedorov.mapviewer;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Rect;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -23,28 +24,30 @@ public class MapView extends View implements TileProvider.Callback {
     private int tilesCountY;
 
     private static final int ZOOM = 16;
-    private static final long START_TILE_X = 33198;
-    private static final long START_TILE_Y = 22539;
+    private static final int START_TILE_X = 33198;
+    private static final int START_TILE_Y = 22539;
 
-    private static final long MIN_TILE_X = 33148;
-    private static final long MIN_TILE_Y = 22489;
+    private static final int MIN_TILE_X = 33148;
+    private static final int MIN_TILE_Y = 22489;
 
-    private static final long MAX_TILE_X = 33248;
-    private static final long MAX_TILE_Y = 22589;
+    private static final int MAX_TILE_X = 33248;
+    private static final int MAX_TILE_Y = 22589;
 
-    private double currentX;
-    private double currentY;
+    private int currentX;
+    private int currentY;
 
     private OverScroller scroller;
 
     private int tileWidth;
     private int tileHeight;
 
-    private long minX;
-    private long minY;
+    private int minX;
+    private int minY;
 
-    private long maxY;
-    private long maxX;
+    private int maxY;
+    private int maxX;
+    private Rect bitmapRect;
+    private Rect screenRect;
 
 
     public MapView(Context context) {
@@ -71,6 +74,8 @@ public class MapView extends View implements TileProvider.Callback {
 
         maxX = MAX_TILE_X * tileWidth;
         maxY = MAX_TILE_Y * tileHeight;
+
+        bitmapRect = new Rect(0, 0, tileWidth, tileHeight);
 
         scroller = new OverScroller(context);
 
@@ -105,7 +110,7 @@ public class MapView extends View implements TileProvider.Callback {
 
 
                 scroller.forceFinished(true);
-                scroller.fling((int)currentX, (int)currentY, (int)-velocityX, (int)-velocityY, (int) minX, (int) maxX, (int) minY, (int) maxY);
+                scroller.fling(currentX, currentY, (int)-velocityX, (int)-velocityY, minX, maxX, minY, maxY);
 
                 postInvalidateOnAnimation();
                 return true;
@@ -147,37 +152,32 @@ public class MapView extends View implements TileProvider.Callback {
             postInvalidateOnAnimation();
         }
 
-        long currentLongX = Math.round(currentX);
-        long currentLongY = Math.round(currentY);
-
-        long startTileX = currentLongX / tileWidth;
-        long startTileY = currentLongY / tileHeight;
+        int tileX = currentX / tileWidth;
+        int tileY = currentY / tileHeight;
 
 
-        int offsetX = (int) -(currentLongX % tileWidth);
-        int offsetY = (int) -(currentLongY % tileHeight);
+        int offsetX = -(currentX % tileWidth);
+        int offsetY = -(currentY % tileHeight);
 
-        int width = canvas.getWidth();
-        int height = canvas.getHeight();
+        bitmapRect.offsetTo(offsetX, offsetY);
 
         for (int x = 0; x < tilesCountX; x++) {
+
+            bitmapRect.offsetTo(offsetX + x * tileWidth, offsetY - tileHeight);
+            tileX++;
+
             for (int y = 0; y < tilesCountY; y++) {
 
 
-                float left = offsetX + x * tileWidth;
-                float top =  offsetY + y * tileHeight;
+                bitmapRect.offset(0, tileHeight);
 
-                if (left > width
-                        || top > height
-                        || left < -tileWidth
-                        || top < -tileHeight) {
+                if (!Rect.intersects(screenRect, bitmapRect)) {
                     continue;
                 }
 
+                Bitmap bitmap = tileProvider.getTile(Tile.getTile(ZOOM, tileX, tileY + y));
 
-                Bitmap bitmap = tileProvider.getTile(Tile.getTile(ZOOM, startTileX + x, startTileY + y));
-
-                canvas.drawBitmap(bitmap, left, top, null);
+                canvas.drawBitmap(bitmap, null, bitmapRect, null);
             }
         }
     }
@@ -188,6 +188,8 @@ public class MapView extends View implements TileProvider.Callback {
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
+
+        screenRect = new Rect(0, 0, w, h);
 
         tilesCountX = getTileCount(w, tileWidth) + 2;
         tilesCountY = getTileCount(h, tileHeight) + 2;
@@ -208,21 +210,18 @@ public class MapView extends View implements TileProvider.Callback {
     }
 
     private void drawTileIfNeeded(Tile tile) {
-        long currentLongX = Math.round(currentX);
-        long currentLongY = Math.round(currentY);
-
-        long startTileX = currentLongX / tileWidth;
-        long startTileY = currentLongY / tileHeight;
+        int startTileX = currentX / tileWidth;
+        int startTileY = currentY / tileHeight;
 
         if (tile.getX() >= startTileX
                 && tile.getX() < startTileX + tilesCountX
                 && tile.getY() >= startTileY
                 && tile.getY() < startTileY + tilesCountY) {
-            int offsetX = (int) -(currentLongX % tileWidth);
-            int offsetY = (int) -(currentLongY % tileHeight);
+            int offsetX = -(currentX % tileWidth);
+            int offsetY = -(currentY % tileHeight);
 
-            int left = (int) (offsetX + (tile.getX() - startTileX) * tileWidth);
-            int top = (int) (offsetY + (tile.getY() - startTileY) * tileHeight);
+            int left = offsetX + (tile.getX() - startTileX) * tileWidth;
+            int top = offsetY + (tile.getY() - startTileY) * tileHeight;
 
             postInvalidate(left, top, left + tileWidth, top + tileHeight);
         }

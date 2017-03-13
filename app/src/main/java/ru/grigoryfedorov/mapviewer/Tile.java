@@ -3,29 +3,29 @@ package ru.grigoryfedorov.mapviewer;
 
 class Tile {
     private final int zoom;
-    private final long x;
-    private final long y;
+    private final int x;
+    private final int y;
 
     // TODO: may be provide object pool
-    static Tile getTile(int zoom, long x, long y) {
+    static Tile getTile(int zoom, int x, int y) {
         return new Tile(zoom, x, y);
     }
 
-    private Tile(int zoom, long x, long y) {
+    private Tile(int zoom, int x, int y) {
         this.zoom = zoom;
         this.x = x;
         this.y = y;
     }
 
-    public int getZoom() {
+    int getZoom() {
         return zoom;
     }
 
-    long getX() {
+    int getX() {
         return x;
     }
 
-    long getY() {
+    int getY() {
         return y;
     }
 
@@ -46,8 +46,8 @@ class Tile {
     @Override
     public int hashCode() {
         int result = zoom;
-        result = 31 * result + (int) (x ^ (x >>> 32));
-        result = 31 * result + (int) (y ^ (y >>> 32));
+        result = 31 * result + x;
+        result = 31 * result + y;
         return result;
     }
 

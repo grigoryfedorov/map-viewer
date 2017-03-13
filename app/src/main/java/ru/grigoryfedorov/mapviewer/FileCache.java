@@ -48,8 +48,6 @@ public class FileCache implements PersistentCache {
     }
 
     private void writeToFile(String path, Bitmap bitmap) throws IOException {
-        Log.d(TAG, "writeToFile " + path);
-
         FileOutputStream out = null;
         try {
             File temp = new File(path + ".temp");
@@ -58,7 +56,6 @@ public class FileCache implements PersistentCache {
 
             temp.renameTo(new File(path));
 
-            Log.d(TAG, "writeToFile " + path + " success");
         } finally {
             if (out != null) {
                 out.close();
@@ -76,7 +73,6 @@ public class FileCache implements PersistentCache {
             return null;
         }
 
-        Log.d(TAG, "get " + file.getPath());
         return BitmapFactory.decodeFile(path);
     }
 }
