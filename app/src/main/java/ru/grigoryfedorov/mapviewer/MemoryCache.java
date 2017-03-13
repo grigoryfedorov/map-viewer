@@ -12,4 +12,6 @@ interface MemoryCache {
     Bitmap get(Tile tile);
 
     void resize(int size);
+
+    void setBitmapPoolConsumer(@Nullable BitmapPoolConsumer bitmapPoolConsumer);
 }

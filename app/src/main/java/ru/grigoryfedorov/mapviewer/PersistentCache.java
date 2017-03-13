@@ -9,4 +9,6 @@ public interface PersistentCache {
 
     @Nullable
     Bitmap get(Tile tile);
+
+    void setBitmapPoolProvider(@Nullable BitmapPoolProvider bitmapPoolProvider);
 }

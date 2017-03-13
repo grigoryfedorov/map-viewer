@@ -16,10 +16,18 @@ public class FileCache implements PersistentCache {
     private static final String TAG = FileCache.class.getSimpleName();
     private final String cacheDir;
 
+    @Nullable
+    private BitmapPoolProvider bitmapPoolProvider;
+
     public FileCache(Context context) {
         cacheDir = context.getCacheDir().getPath() + File.separator + "cache" + File.separator;
         new File(cacheDir).mkdirs();
+    }
 
+
+    @Override
+    public void setBitmapPoolProvider(BitmapPoolProvider bitmapPoolProvider) {
+        this.bitmapPoolProvider = bitmapPoolProvider;
     }
 
     @Override
@@ -73,6 +81,8 @@ public class FileCache implements PersistentCache {
             return null;
         }
 
-        return BitmapFactory.decodeFile(path);
+        return BitmapFactory.decodeFile(path, BitmapOptionsProvider.getOptions(bitmapPoolProvider));
     }
+
+
 }

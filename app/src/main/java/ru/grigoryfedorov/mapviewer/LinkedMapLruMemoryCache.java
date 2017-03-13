@@ -13,14 +13,30 @@ class LinkedMapLruMemoryCache implements MemoryCache {
     private final Object lock = new Object();
     private int maxSize;
 
-    LinkedMapLruMemoryCache(int size) {
-        this.maxSize = size;
+    @Nullable
+    BitmapPoolConsumer bitmapPoolConsumer;
+
+    public LinkedMapLruMemoryCache(int maxSize) {
+        this.maxSize = maxSize;
 
         this.map = new LinkedHashMap<Tile, Bitmap>() {
             protected boolean removeEldestEntry(Map.Entry<Tile,Bitmap> eldest) {
-                return size() > getMaxSize();
+                if (size() > getMaxSize()) {
+                    if (bitmapPoolConsumer != null) {
+                        bitmapPoolConsumer.add(eldest.getValue());
+                    }
+
+                    return true;
+                }
+
+                return false;
             }
         };
+    }
+
+    @Override
+    public void setBitmapPoolConsumer(@Nullable BitmapPoolConsumer bitmapPoolConsumer) {
+        this.bitmapPoolConsumer = bitmapPoolConsumer;
     }
 
     @Override

@@ -28,15 +28,24 @@ class TileProvider {
 
     private BitmapLoader loader;
 
+
     interface Callback {
         void onTileUpdated(Tile tile);
     }
 
     TileProvider(Context context, Callback callback) {
-        this.loader = new UrlConnectionLoader();
         this.callback = callback;
+
+        BitmapPool bitmapPool = new BitmapPool();
+
         memoryCache = new LinkedMapLruMemoryCache(16);
+        memoryCache.setBitmapPoolConsumer(bitmapPool);
+
         persistentCache = new FileCache(context);
+        persistentCache.setBitmapPoolProvider(bitmapPool);
+        loader = new UrlConnectionLoader();
+        loader.setBitmapPoolProvider(bitmapPool);
+
         placeholderProvider = new PlaceholderProvider(TILE_WIDTH, TILE_HEIGHT);
 
         executorService = Executors.newFixedThreadPool(1);
@@ -114,6 +123,6 @@ class TileProvider {
 
     void onSizeChanged(int tilesCountX, int tilesCountY) {
         memoryCache.resize(tilesCountX * tilesCountY);
-        executorService = Executors.newFixedThreadPool(tilesCountX * tilesCountY);
+        executorService = Executors.newFixedThreadPool(2 * tilesCountX * tilesCountY);
     }
 }

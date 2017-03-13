@@ -2,6 +2,7 @@ package ru.grigoryfedorov.mapviewer;
 
 
 import android.graphics.Bitmap;
+import android.support.annotation.Nullable;
 import android.util.Log;
 import android.util.LruCache;
 
@@ -28,5 +29,10 @@ class AndroidLruMemoryCache implements MemoryCache {
     public void resize(int size) {
         Log.d(TAG, "resize " + size);
         tiles.resize(size);
+    }
+
+    @Override
+    public void setBitmapPoolConsumer(@Nullable BitmapPoolConsumer bitmapPoolConsumer) {
+
     }
 }
