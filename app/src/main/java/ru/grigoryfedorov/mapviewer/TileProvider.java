@@ -15,12 +15,14 @@ class TileProvider {
     private static final int TILE_SIZE = 256;
     private static final int TILE_WIDTH = TILE_SIZE;
     private static final int TILE_HEIGHT = TILE_SIZE;
+    private static final String TAG = TileProvider.class.getSimpleName();
 
     private final Callback callback;
-    private final ExecutorService executorService;
-    private final Set<Tile> plannedRequests;
+    private ExecutorService executorService;
+    private final Set<Tile> inProgress;
+    private final Set<Tile> planned;
 
-    private TileCache tileCache;
+    private TileCache memoryCache;
     private PersistentCache persistentCache;
     private PlaceholderProvider placeholderProvider;
 
@@ -33,13 +35,14 @@ class TileProvider {
     TileProvider(Context context, Callback callback) {
         this.loader = new UrlConnectionLoader();
         this.callback = callback;
-        tileCache = new LruTileCache(128);
+        memoryCache = new LruTileCache(1);
         persistentCache = new FileCache(context);
         placeholderProvider = new PlaceholderProvider(TILE_WIDTH, TILE_HEIGHT);
 
-        executorService = Executors.newFixedThreadPool(70);
+        executorService = Executors.newFixedThreadPool(1);
 
-        plannedRequests = Collections.newSetFromMap(new ConcurrentHashMap<Tile, Boolean>());
+        inProgress =Collections.newSetFromMap(new ConcurrentHashMap<Tile, Boolean>());
+        planned = Collections.newSetFromMap(new ConcurrentHashMap<Tile, Boolean>());
     }
 
     int getTileWidth() {
@@ -51,7 +54,7 @@ class TileProvider {
     }
 
     Bitmap getTile(final Tile tile) {
-        Bitmap bitmap = tileCache.get(tile);
+        Bitmap bitmap = memoryCache.get(tile);
 
         if (bitmap != null) {
             return bitmap;
@@ -63,15 +66,28 @@ class TileProvider {
     }
 
     private void request(final Tile tile) {
-        if (plannedRequests.contains(tile)) {
+
+        if (planned.contains(tile)) {
             return;
-        } else {
-            plannedRequests.add(tile);
         }
+
+        planned.add(tile);
 
         executorService.execute(new Runnable() {
             @Override
             public void run() {
+                if (memoryCache.get(tile) != null) {
+                    planned.remove(tile);
+                    inProgress.remove(tile);
+                    return;
+                }
+
+                if (inProgress.contains(tile)) {
+                    return;
+                }
+
+                inProgress.add(tile);
+
                 Bitmap bitmap = persistentCache.get(tile);
 
                 if (bitmap == null) {
@@ -82,10 +98,12 @@ class TileProvider {
                 }
 
                 if (bitmap != null) {
-                    tileCache.put(tile, bitmap);
+                    memoryCache.put(tile, bitmap);
                     callback.onTileUpdated(tile);
-                    plannedRequests.remove(tile);
                 }
+
+                planned.remove(tile);
+                inProgress.remove(tile);
             }
         });
     }
@@ -95,6 +113,7 @@ class TileProvider {
     }
 
     void onSizeChanged(int tilesCountX, int tilesCountY) {
-        tileCache.resize(tilesCountX * tilesCountY);
+        memoryCache.resize(tilesCountX * tilesCountY);
+        executorService = Executors.newFixedThreadPool(tilesCountX * tilesCountY);
     }
 }
