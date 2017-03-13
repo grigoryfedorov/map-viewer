@@ -22,7 +22,7 @@ class TileProvider {
     private final Set<Tile> inProgress;
     private final Set<Tile> planned;
 
-    private TileCache memoryCache;
+    private MemoryCache memoryCache;
     private PersistentCache persistentCache;
     private PlaceholderProvider placeholderProvider;
 
@@ -35,7 +35,7 @@ class TileProvider {
     TileProvider(Context context, Callback callback) {
         this.loader = new UrlConnectionLoader();
         this.callback = callback;
-        memoryCache = new LruTileCache(1);
+        memoryCache = new AndroidLruMemoryCache(1);
         persistentCache = new FileCache(context);
         placeholderProvider = new PlaceholderProvider(TILE_WIDTH, TILE_HEIGHT);
 

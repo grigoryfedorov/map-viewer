@@ -4,7 +4,7 @@ package ru.grigoryfedorov.mapviewer;
 import android.graphics.Bitmap;
 import android.support.annotation.Nullable;
 
-interface TileCache {
+interface MemoryCache {
 
     void put(Tile tile, Bitmap bitmap);
 

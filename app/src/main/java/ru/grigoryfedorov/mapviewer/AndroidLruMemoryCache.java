@@ -5,12 +5,12 @@ import android.graphics.Bitmap;
 import android.util.Log;
 import android.util.LruCache;
 
-class LruTileCache implements TileCache {
+class AndroidLruMemoryCache implements MemoryCache {
 
-    private static final String TAG = LruTileCache.class.getSimpleName();
+    private static final String TAG = AndroidLruMemoryCache.class.getSimpleName();
     private LruCache<Tile, Bitmap> tiles;
 
-    LruTileCache(int size) {
+    AndroidLruMemoryCache(int size) {
         tiles = new LruCache<>(size);
     }
 
