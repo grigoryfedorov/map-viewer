@@ -3,6 +3,7 @@ package ru.grigoryfedorov.mapviewer;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
@@ -24,6 +25,7 @@ public class MapView extends View implements TileProvider.Callback {
     private int tilesCountY;
 
     private static final int ZOOM = 16;
+
     private static final int START_TILE_X = 33198;
     private static final int START_TILE_Y = 22539;
 
@@ -33,21 +35,17 @@ public class MapView extends View implements TileProvider.Callback {
     private static final int MAX_TILE_X = 33248;
     private static final int MAX_TILE_Y = 22589;
 
-    private int currentX;
-    private int currentY;
 
     private OverScroller scroller;
 
     private int tileWidth;
     private int tileHeight;
 
-    private int minX;
-    private int minY;
 
-    private int maxY;
-    private int maxX;
     private Rect bitmapRect;
     private Rect screenRect;
+    private MapController mapController;
+    private Rect borders;
 
 
     public MapView(Context context) {
@@ -66,14 +64,19 @@ public class MapView extends View implements TileProvider.Callback {
         tileWidth = tileProvider.getTileWidth();
         tileHeight = tileProvider.getTileHeight();
 
-        currentX = START_TILE_X * tileWidth;
-        currentY = START_TILE_Y * tileHeight;
 
-        minX = MIN_TILE_X * tileWidth;
-        minY = MIN_TILE_Y * tileHeight;
+        Point start = new Point(START_TILE_X * tileWidth, START_TILE_Y * tileHeight);
 
-        maxX = MAX_TILE_X * tileWidth;
-        maxY = MAX_TILE_Y * tileHeight;
+        borders = new Rect(MIN_TILE_X * tileWidth,
+                MIN_TILE_Y * tileHeight,
+                MAX_TILE_X * tileWidth,
+                MAX_TILE_Y * tileHeight);
+
+        mapController = new MapController(start, borders);
+
+
+
+
 
         bitmapRect = new Rect(0, 0, tileWidth, tileHeight);
 
@@ -94,10 +97,7 @@ public class MapView extends View implements TileProvider.Callback {
             public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
                 Log.d(TAG, "onScroll x: " + distanceX + " y: " + distanceY);
 
-                currentX += distanceX;
-                currentY += distanceY;
-
-                checkBorders();
+                mapController.offset((int)distanceX, (int)distanceY);
 
                 postInvalidateOnAnimation();
 
@@ -110,31 +110,15 @@ public class MapView extends View implements TileProvider.Callback {
 
 
                 scroller.forceFinished(true);
-                scroller.fling(currentX, currentY, (int)-velocityX, (int)-velocityY, minX, maxX, minY, maxY);
+                Point current = mapController.getCurrent();
+                scroller.fling(current.x, current.y, (int)-velocityX, (int)-velocityY,
+                        borders.left, borders.right, borders.top, borders.bottom);
 
                 postInvalidateOnAnimation();
                 return true;
             }
         });
 
-    }
-
-    void checkBorders() {
-        if (currentX < minX) {
-            currentX = minX;
-        }
-
-        if (currentY < minY) {
-            currentY = minY;
-        }
-
-        if (currentX > maxX) {
-            currentX = maxX;
-        }
-
-        if (currentY > maxY) {
-            currentY = maxY;
-        }
     }
 
     @Override
@@ -147,17 +131,18 @@ public class MapView extends View implements TileProvider.Callback {
     @Override
     protected void onDraw(Canvas canvas) {
         if (scroller.computeScrollOffset()) {
-            currentX = scroller.getCurrX();
-            currentY = scroller.getCurrY();
+            mapController.set(scroller.getCurrX(), scroller.getCurrY());
             postInvalidateOnAnimation();
         }
 
-        int tileX = currentX / tileWidth;
-        int tileY = currentY / tileHeight;
+        Point current = mapController.getCurrent();
+
+        int tileX = current.x / tileWidth;
+        int tileY = current.y / tileHeight;
 
 
-        int offsetX = -(currentX % tileWidth);
-        int offsetY = -(currentY % tileHeight);
+        int offsetX = -(current.x % tileWidth);
+        int offsetY = -(current.y % tileHeight);
 
         bitmapRect.offsetTo(offsetX, offsetY);
 
@@ -210,15 +195,17 @@ public class MapView extends View implements TileProvider.Callback {
     }
 
     private void drawTileIfNeeded(Tile tile) {
-        int startTileX = currentX / tileWidth;
-        int startTileY = currentY / tileHeight;
+        Point current = mapController.getCurrent();
+
+        int startTileX = current.x / tileWidth;
+        int startTileY = current.y / tileHeight;
 
         if (tile.getX() >= startTileX
                 && tile.getX() < startTileX + tilesCountX
                 && tile.getY() >= startTileY
                 && tile.getY() < startTileY + tilesCountY) {
-            int offsetX = -(currentX % tileWidth);
-            int offsetY = -(currentY % tileHeight);
+            int offsetX = -(current.x % tileWidth);
+            int offsetY = -(current.y % tileHeight);
 
             int left = offsetX + (tile.getX() - startTileX) * tileWidth;
             int top = offsetY + (tile.getY() - startTileY) * tileHeight;
