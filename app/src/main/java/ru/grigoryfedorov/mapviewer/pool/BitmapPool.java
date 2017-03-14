@@ -11,6 +11,7 @@ import java.util.Iterator;
 import java.util.Set;
 
 public class BitmapPool implements BitmapPoolProvider, BitmapPoolConsumer {
+    private static final String LOG = BitmapPool.class.getSimpleName();
     private final Set<SoftReference<Bitmap>> reusableBitmaps;
 
     public BitmapPool() {
@@ -20,6 +21,7 @@ public class BitmapPool implements BitmapPoolProvider, BitmapPoolConsumer {
     @Override
     public void add(Bitmap bitmap) {
         reusableBitmaps.add(new SoftReference<>(bitmap));
+//        Log.i(LOG, "new reusable bitmap");
     }
 
     @Override

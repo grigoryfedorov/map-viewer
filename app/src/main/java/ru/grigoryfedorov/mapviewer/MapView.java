@@ -59,10 +59,8 @@ public class MapView extends View implements TileProvider.Callback {
     public MapView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
 
-        tileProvider = new TileProvider(getContext(), this);
-
-        tileWidth = tileProvider.getTileWidth();
-        tileHeight = tileProvider.getTileHeight();
+        tileWidth = TileProvider.getTileWidth();
+        tileHeight = TileProvider.getTileHeight();
 
 
         Point start = new Point(START_TILE_X * tileWidth, START_TILE_Y * tileHeight);
@@ -74,7 +72,7 @@ public class MapView extends View implements TileProvider.Callback {
 
         mapController = new MapController(start, borders);
 
-
+        tileProvider = new TileProvider(getContext(), this, mapController);
 
 
 
@@ -85,7 +83,7 @@ public class MapView extends View implements TileProvider.Callback {
         gestureDetector = new GestureDetector(context, new GestureDetector.SimpleOnGestureListener() {
             @Override
             public boolean onDown(MotionEvent e) {
-                Log.d(TAG, "GestureDetector onDown e " +  e);
+//                Log.d(TAG, "GestureDetector onDown e " +  e);
 
                 scroller.forceFinished(true);
                 postInvalidateOnAnimation();
@@ -95,7 +93,7 @@ public class MapView extends View implements TileProvider.Callback {
 
             @Override
             public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
-                Log.d(TAG, "onScroll x: " + distanceX + " y: " + distanceY);
+//                Log.d(TAG, "onScroll x: " + distanceX + " y: " + distanceY);
 
                 mapController.offset((int)distanceX, (int)distanceY);
 
@@ -106,7 +104,7 @@ public class MapView extends View implements TileProvider.Callback {
 
             @Override
             public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-                Log.d(TAG, "onFling x: " + velocityX + " y: " + velocityY);
+//                Log.d(TAG, "onFling x: " + velocityX + " y: " + velocityY);
 
 
                 scroller.forceFinished(true);
@@ -195,8 +193,15 @@ public class MapView extends View implements TileProvider.Callback {
     }
 
     private void drawTileIfNeeded(Tile tile) {
-        Point current = mapController.getCurrent();
+        Rect rect = getDrawRect(tile, mapController.getCurrent());
 
+        if (rect != null) {
+            postInvalidate(rect.left, rect.top, rect.right, rect.bottom);
+        }
+    }
+
+    @Nullable
+    private Rect getDrawRect(Tile tile, Point current) {
         int startTileX = current.x / tileWidth;
         int startTileY = current.y / tileHeight;
 
@@ -210,7 +215,10 @@ public class MapView extends View implements TileProvider.Callback {
             int left = offsetX + (tile.getX() - startTileX) * tileWidth;
             int top = offsetY + (tile.getY() - startTileY) * tileHeight;
 
-            postInvalidate(left, top, left + tileWidth, top + tileHeight);
+            return new Rect(left, top, left + tileWidth, top + tileHeight);
         }
+        return null;
     }
+
+
 }
