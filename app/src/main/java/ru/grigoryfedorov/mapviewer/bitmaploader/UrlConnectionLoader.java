@@ -28,6 +28,7 @@ public class UrlConnectionLoader implements BitmapLoader {
     @Override
     public Bitmap loadBitmap(final String urlString) {
         try {
+            Log.i(TAG, "requesting url " + urlString);
             URL url = new URL(urlString);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setDoInput(true);
