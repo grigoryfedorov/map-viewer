@@ -86,7 +86,7 @@ public class MapView extends View implements TileProvider.Callback {
 //                Log.d(TAG, "GestureDetector onDown e " +  e);
 
                 scroller.forceFinished(true);
-                postInvalidateOnAnimation();
+                invalidate();
 
                 return true;
             }
@@ -97,7 +97,7 @@ public class MapView extends View implements TileProvider.Callback {
 
                 mapController.offset((int)distanceX, (int)distanceY);
 
-                postInvalidateOnAnimation();
+                invalidate();
 
                 return true;
             }
@@ -112,7 +112,7 @@ public class MapView extends View implements TileProvider.Callback {
                 scroller.fling(current.x, current.y, (int)-velocityX, (int)-velocityY,
                         borders.left, borders.right, borders.top, borders.bottom);
 
-                postInvalidateOnAnimation();
+                invalidate();
                 return true;
             }
         });
@@ -130,7 +130,7 @@ public class MapView extends View implements TileProvider.Callback {
     protected void onDraw(Canvas canvas) {
         if (scroller.computeScrollOffset()) {
             mapController.set(scroller.getCurrX(), scroller.getCurrY());
-            postInvalidateOnAnimation();
+            invalidate();
         }
 
         Point current = mapController.getCurrent();
