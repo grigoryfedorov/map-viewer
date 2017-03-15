@@ -16,6 +16,7 @@ public class MapType {
 
     public static final MapType OSM_CYCLE = new MapType("tile.opencyclemap.org/cycle", new String[]{"a", "b", "c"});
     public static final MapType OSM = new MapType("tile.openstreetmap.org", new String[]{"a", "b", "c"});
+    public static final MapType OPEN_RAIL_WAY = new MapType("tiles.openrailwaymap.org/standard", new String[]{"a", "b", "c"}, 512, 512);
 
     public MapType(String baseUrl, String[] subDomains) {
         this(baseUrl, subDomains, DEFAULT_TILE_SIZE, DEFAULT_TILE_SIZE);
