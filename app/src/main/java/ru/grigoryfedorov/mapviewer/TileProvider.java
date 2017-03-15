@@ -21,13 +21,11 @@ import ru.grigoryfedorov.mapviewer.pool.BitmapPool;
 
 public class TileProvider {
 
-    private static final int TILE_SIZE = 256;
-    private static final int TILE_WIDTH = TILE_SIZE;
-    private static final int TILE_HEIGHT = TILE_SIZE;
     private static final String TAG = TileProvider.class.getSimpleName();
 
     private final Callback callback;
     private final MapController mapController;
+    private final MapType mapType;
     private ExecutorService executorService;
     private final Set<Tile> inProgress;
     private final Set<Tile> planned;
@@ -45,9 +43,10 @@ public class TileProvider {
         void onTileUpdated(Tile tile);
     }
 
-    TileProvider(Context context, Callback callback, MapController mapController) {
+    TileProvider(Context context, Callback callback, MapController mapController, MapType mapType) {
         this.callback = callback;
         this.mapController = mapController;
+        this.mapType = mapType;
 
         BitmapPool bitmapPool = new BitmapPool();
 
@@ -59,20 +58,12 @@ public class TileProvider {
         loader = new UrlConnectionLoader();
         loader.setBitmapPoolProvider(bitmapPool);
 
-        placeholderProvider = new PlaceholderProvider(TILE_WIDTH, TILE_HEIGHT);
+        placeholderProvider = new PlaceholderProvider(mapType.getTileWidth(), mapType.getTileHeight());
 
         executorService = Executors.newFixedThreadPool(1);
 
         inProgress = Collections.newSetFromMap(new ConcurrentHashMap<Tile, Boolean>());
         planned = Collections.newSetFromMap(new ConcurrentHashMap<Tile, Boolean>());
-    }
-
-    static int getTileWidth() {
-        return TILE_WIDTH;
-    }
-
-    static int getTileHeight() {
-        return TILE_HEIGHT;
     }
 
     Bitmap getTile(final Tile tile) {
@@ -129,7 +120,9 @@ public class TileProvider {
 
                 if (bitmap != null) {
                     memoryCache.put(tile, bitmap);
-                    callback.onTileUpdated(tile);
+                    if (needDraw(tile, mapController.getCurrent())) {
+                        callback.onTileUpdated(tile);
+                    }
                 }
 
                 planned.remove(tile);
@@ -139,7 +132,7 @@ public class TileProvider {
     }
 
     private Bitmap requestTile(final Tile tile) {
-        return loader.loadBitmap("http://b.tile.opencyclemap.org/cycle/" + tile.getZoom() + "/" + tile.getX() + "/" + tile.getY() + ".png");
+        return loader.loadBitmap(mapType.getTileRequestUrl(tile));
     }
 
     void onSizeChanged(int tilesCountX, int tilesCountY) {
@@ -151,8 +144,8 @@ public class TileProvider {
     }
 
     public boolean needDraw(Tile tile, Point current) {
-        int startTileX = current.x / getTileWidth();
-        int startTileY = current.y / getTileHeight();
+        int startTileX = current.x / mapType.getTileWidth();
+        int startTileY = current.y / mapType.getTileHeight();
 
         return tile.getX() >= startTileX
                 && tile.getX() < startTileX + tilesCountX

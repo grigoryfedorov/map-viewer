@@ -59,8 +59,10 @@ public class MapView extends View implements TileProvider.Callback {
     public MapView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
 
-        tileWidth = TileProvider.getTileWidth();
-        tileHeight = TileProvider.getTileHeight();
+        MapType mapType = MapType.OSM_CYCLE;
+
+        tileWidth = mapType.getTileWidth();
+        tileHeight = mapType.getTileHeight();
 
 
         Point start = new Point(START_TILE_X * tileWidth, START_TILE_Y * tileHeight);
@@ -72,7 +74,7 @@ public class MapView extends View implements TileProvider.Callback {
 
         mapController = new MapController(start, borders);
 
-        tileProvider = new TileProvider(getContext(), this, mapController);
+        tileProvider = new TileProvider(getContext(), this, mapController, mapType);
 
 
 
@@ -189,36 +191,9 @@ public class MapView extends View implements TileProvider.Callback {
 
     @Override
     public void onTileUpdated(Tile tile) {
-        drawTileIfNeeded(tile);
+        postInvalidate();
     }
 
-    private void drawTileIfNeeded(Tile tile) {
-        Rect rect = getDrawRect(tile, mapController.getCurrent());
-
-        if (rect != null) {
-            postInvalidate();
-        }
-    }
-
-    @Nullable
-    private Rect getDrawRect(Tile tile, Point current) {
-        int startTileX = current.x / tileWidth;
-        int startTileY = current.y / tileHeight;
-
-        if (tile.getX() >= startTileX
-                && tile.getX() < startTileX + tilesCountX
-                && tile.getY() >= startTileY
-                && tile.getY() < startTileY + tilesCountY) {
-            int offsetX = -(current.x % tileWidth);
-            int offsetY = -(current.y % tileHeight);
-
-            int left = offsetX + (tile.getX() - startTileX) * tileWidth;
-            int top = offsetY + (tile.getY() - startTileY) * tileHeight;
-
-            return new Rect(left, top, left + tileWidth, top + tileHeight);
-        }
-        return null;
-    }
 
 
 }
