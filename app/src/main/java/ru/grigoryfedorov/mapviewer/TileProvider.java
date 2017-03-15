@@ -24,7 +24,7 @@ public class TileProvider {
     private static final String TAG = TileProvider.class.getSimpleName();
 
     private final Callback callback;
-    private final MapController mapController;
+    private final SyncPoint currentCoordinates;
     private final MapType mapType;
     private ExecutorService executorService;
     private final Set<Tile> inProgress;
@@ -43,14 +43,14 @@ public class TileProvider {
         void onTileUpdated(Tile tile);
     }
 
-    TileProvider(Context context, Callback callback, MapController mapController, MapType mapType) {
+    TileProvider(Context context, Callback callback, SyncPoint currentCoordinates, MapType mapType) {
         this.callback = callback;
-        this.mapController = mapController;
+        this.currentCoordinates = currentCoordinates;
         this.mapType = mapType;
 
         BitmapPool bitmapPool = new BitmapPool();
 
-        memoryCache = new VisibleMemoryCache(mapController, this);
+        memoryCache = new VisibleMemoryCache(this);
         memoryCache.setBitmapPoolConsumer(bitmapPool);
 
         persistentCache = new FileCache(context);
@@ -97,7 +97,7 @@ public class TileProvider {
                     return;
                 }
 
-                if (!needDraw(tile, mapController.getCurrent())) {
+                if (!needDraw(tile, currentCoordinates.get())) {
                     planned.remove(tile);
 //                    Log.i(TAG, "Cancel tile request - not need to draw");
                     return;
@@ -120,7 +120,7 @@ public class TileProvider {
 
                 if (bitmap != null) {
                     memoryCache.put(tile, bitmap);
-                    if (needDraw(tile, mapController.getCurrent())) {
+                    if (needDraw(tile, currentCoordinates.get())) {
                         callback.onTileUpdated(tile);
                     }
                 }
@@ -141,6 +141,10 @@ public class TileProvider {
 
         memoryCache.resize(tilesCountX * tilesCountY);
         executorService = Executors.newFixedThreadPool(tilesCountX * tilesCountY);
+    }
+
+    public Point getCurrentCoordinates() {
+        return currentCoordinates.get();
     }
 
     public boolean needDraw(Tile tile, Point current) {

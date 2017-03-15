@@ -7,7 +7,6 @@ import android.support.annotation.Nullable;
 
 import java.util.concurrent.ConcurrentHashMap;
 
-import ru.grigoryfedorov.mapviewer.MapController;
 import ru.grigoryfedorov.mapviewer.Tile;
 import ru.grigoryfedorov.mapviewer.TileProvider;
 import ru.grigoryfedorov.mapviewer.pool.BitmapPoolConsumer;
@@ -15,15 +14,13 @@ import ru.grigoryfedorov.mapviewer.pool.BitmapPoolConsumer;
 public class VisibleMemoryCache implements MemoryCache {
 
 
-    private final MapController mapController;
     private final TileProvider tileProvider;
     private BitmapPoolConsumer bitmapPoolConsumer;
 
     private ConcurrentHashMap<Tile, Bitmap> map;
 
-    public VisibleMemoryCache(MapController mapController, TileProvider tileProvider) {
+    public VisibleMemoryCache(TileProvider tileProvider) {
         map = new ConcurrentHashMap<>();
-        this.mapController = mapController;
         this.tileProvider = tileProvider;
     }
 
@@ -31,7 +28,7 @@ public class VisibleMemoryCache implements MemoryCache {
     public void put(Tile tile, Bitmap bitmap) {
         map.put(tile, bitmap);
 
-        Point current = mapController.getCurrent();
+        Point current = tileProvider.getCurrentCoordinates();
 
         for (Tile cachedTile : map.keySet()) {
             if (!tileProvider.needDraw(cachedTile, current)) {

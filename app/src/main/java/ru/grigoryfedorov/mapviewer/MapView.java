@@ -44,7 +44,7 @@ public class MapView extends View implements TileProvider.Callback {
 
     private Rect bitmapRect;
     private Rect screenRect;
-    private MapController mapController;
+    private SyncPoint currentCoordinatesInPixels;
     private Rect borders;
 
 
@@ -72,9 +72,9 @@ public class MapView extends View implements TileProvider.Callback {
                 MAX_TILE_X * tileWidth,
                 MAX_TILE_Y * tileHeight);
 
-        mapController = new MapController(start, borders);
+        currentCoordinatesInPixels = new SyncPoint(start);
 
-        tileProvider = new TileProvider(getContext(), this, mapController, mapType);
+        tileProvider = new TileProvider(getContext(), this, currentCoordinatesInPixels, mapType);
 
 
 
@@ -97,7 +97,13 @@ public class MapView extends View implements TileProvider.Callback {
             public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
 //                Log.d(TAG, "onScroll x: " + distanceX + " y: " + distanceY);
 
-                mapController.offset((int)distanceX, (int)distanceY);
+                Point current = currentCoordinatesInPixels.get();
+
+                boolean isSpringBack = scroller.springBack(current.x + (int)distanceX, current.y + (int)distanceY, borders.left, borders.right, borders.top, borders.bottom);
+
+                if (!isSpringBack) {
+                    currentCoordinatesInPixels.offset((int)distanceX, (int)distanceY);
+                }
 
                 invalidate();
 
@@ -108,11 +114,9 @@ public class MapView extends View implements TileProvider.Callback {
             public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
 //                Log.d(TAG, "onFling x: " + velocityX + " y: " + velocityY);
 
-
-                scroller.forceFinished(true);
-                Point current = mapController.getCurrent();
+                Point current = currentCoordinatesInPixels.get();
                 scroller.fling(current.x, current.y, (int)-velocityX, (int)-velocityY,
-                        borders.left, borders.right, borders.top, borders.bottom);
+                        borders.left, borders.right, borders.top, borders.bottom, screenRect.width() / 2, screenRect.height() / 2);
 
                 invalidate();
                 return true;
@@ -131,11 +135,11 @@ public class MapView extends View implements TileProvider.Callback {
     @Override
     protected void onDraw(Canvas canvas) {
         if (scroller.computeScrollOffset()) {
-            mapController.set(scroller.getCurrX(), scroller.getCurrY());
+            currentCoordinatesInPixels.set(scroller.getCurrX(), scroller.getCurrY());
             invalidate();
         }
 
-        Point current = mapController.getCurrent();
+        Point current = currentCoordinatesInPixels.get();
 
         int tileX = current.x / tileWidth;
         int tileY = current.y / tileHeight;
