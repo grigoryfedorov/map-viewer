@@ -196,7 +196,7 @@ public class MapView extends View implements TileProvider.Callback {
         Rect rect = getDrawRect(tile, mapController.getCurrent());
 
         if (rect != null) {
-            postInvalidate(rect.left, rect.top, rect.right, rect.bottom);
+            postInvalidate();
         }
     }
 
