@@ -5,7 +5,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.view.WindowManager;
 
-import ru.grigoryfedorov.mapviewer.R;
+import ru.grigoryfedorov.mapview.R;
 
 
 public class MainActivity extends Activity {

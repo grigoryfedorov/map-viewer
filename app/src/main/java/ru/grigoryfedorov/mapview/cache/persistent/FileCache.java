@@ -1,4 +1,4 @@
-package ru.grigoryfedorov.mapviewer.cache.persistent;
+package ru.grigoryfedorov.mapview.cache.persistent;
 
 
 import android.content.Context;
@@ -12,9 +12,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-import ru.grigoryfedorov.mapviewer.BitmapOptionsProvider;
-import ru.grigoryfedorov.mapviewer.Tile;
-import ru.grigoryfedorov.mapviewer.pool.BitmapPoolProvider;
+import ru.grigoryfedorov.mapview.BitmapOptionsProvider;
+import ru.grigoryfedorov.mapview.Tile;
+import ru.grigoryfedorov.mapview.pool.BitmapPoolProvider;
 
 public class FileCache implements PersistentCache {
     private static final String TAG = FileCache.class.getSimpleName();

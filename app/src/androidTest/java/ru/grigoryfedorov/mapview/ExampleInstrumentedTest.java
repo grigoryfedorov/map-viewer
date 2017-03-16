@@ -1,4 +1,4 @@
-package ru.grigoryfedorov.mapviewer;
+package ru.grigoryfedorov.mapview;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;

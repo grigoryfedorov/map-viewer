@@ -1,4 +1,4 @@
-package ru.grigoryfedorov.mapviewer.cache.memory;
+package ru.grigoryfedorov.mapview.cache.memory;
 
 
 import android.graphics.Bitmap;
@@ -6,8 +6,8 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 import android.util.LruCache;
 
-import ru.grigoryfedorov.mapviewer.Tile;
-import ru.grigoryfedorov.mapviewer.pool.BitmapPoolConsumer;
+import ru.grigoryfedorov.mapview.Tile;
+import ru.grigoryfedorov.mapview.pool.BitmapPoolConsumer;
 
 public class AndroidLruMemoryCache implements MemoryCache {
 

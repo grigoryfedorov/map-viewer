@@ -1,4 +1,4 @@
-package ru.grigoryfedorov.mapviewer;
+package ru.grigoryfedorov.mapview;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;

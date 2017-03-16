@@ -1,11 +1,11 @@
-package ru.grigoryfedorov.mapviewer.cache.memory;
+package ru.grigoryfedorov.mapview.cache.memory;
 
 
 import android.graphics.Bitmap;
 import android.support.annotation.Nullable;
 
-import ru.grigoryfedorov.mapviewer.Tile;
-import ru.grigoryfedorov.mapviewer.pool.BitmapPoolConsumer;
+import ru.grigoryfedorov.mapview.Tile;
+import ru.grigoryfedorov.mapview.pool.BitmapPoolConsumer;
 
 public interface MemoryCache {
 

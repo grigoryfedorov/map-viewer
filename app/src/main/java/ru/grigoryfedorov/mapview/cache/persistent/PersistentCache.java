@@ -1,11 +1,11 @@
-package ru.grigoryfedorov.mapviewer.cache.persistent;
+package ru.grigoryfedorov.mapview.cache.persistent;
 
 
 import android.graphics.Bitmap;
 import android.support.annotation.Nullable;
 
-import ru.grigoryfedorov.mapviewer.Tile;
-import ru.grigoryfedorov.mapviewer.pool.BitmapPoolProvider;
+import ru.grigoryfedorov.mapview.Tile;
+import ru.grigoryfedorov.mapview.pool.BitmapPoolProvider;
 
 public interface PersistentCache {
     void put(Tile tile, Bitmap bitmap);

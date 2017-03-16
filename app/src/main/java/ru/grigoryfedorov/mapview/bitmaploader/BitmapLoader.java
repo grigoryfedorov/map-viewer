@@ -1,10 +1,10 @@
-package ru.grigoryfedorov.mapviewer.bitmaploader;
+package ru.grigoryfedorov.mapview.bitmaploader;
 
 
 import android.graphics.Bitmap;
 import android.support.annotation.Nullable;
 
-import ru.grigoryfedorov.mapviewer.pool.BitmapPoolProvider;
+import ru.grigoryfedorov.mapview.pool.BitmapPoolProvider;
 
 public interface BitmapLoader {
 

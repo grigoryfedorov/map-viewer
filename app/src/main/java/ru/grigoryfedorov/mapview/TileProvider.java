@@ -1,4 +1,4 @@
-package ru.grigoryfedorov.mapviewer;
+package ru.grigoryfedorov.mapview;
 
 
 import android.content.Context;
@@ -11,13 +11,13 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import ru.grigoryfedorov.mapviewer.bitmaploader.BitmapLoader;
-import ru.grigoryfedorov.mapviewer.bitmaploader.UrlConnectionLoader;
-import ru.grigoryfedorov.mapviewer.cache.memory.MemoryCache;
-import ru.grigoryfedorov.mapviewer.cache.memory.VisibleMemoryCache;
-import ru.grigoryfedorov.mapviewer.cache.persistent.FileCache;
-import ru.grigoryfedorov.mapviewer.cache.persistent.PersistentCache;
-import ru.grigoryfedorov.mapviewer.pool.BitmapPool;
+import ru.grigoryfedorov.mapview.bitmaploader.BitmapLoader;
+import ru.grigoryfedorov.mapview.bitmaploader.UrlConnectionLoader;
+import ru.grigoryfedorov.mapview.cache.memory.MemoryCache;
+import ru.grigoryfedorov.mapview.cache.memory.VisibleMemoryCache;
+import ru.grigoryfedorov.mapview.cache.persistent.FileCache;
+import ru.grigoryfedorov.mapview.cache.persistent.PersistentCache;
+import ru.grigoryfedorov.mapview.pool.BitmapPool;
 
 public class TileProvider {
 
