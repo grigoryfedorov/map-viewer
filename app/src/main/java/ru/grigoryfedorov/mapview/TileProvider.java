@@ -24,7 +24,7 @@ public class TileProvider {
     private static final String TAG = TileProvider.class.getSimpleName();
 
     private final Callback callback;
-    private final SyncPoint currentCoordinates;
+    private final ScrollController scrollController;
     private final MapType mapType;
     private ExecutorService executorService;
     private final Set<Tile> inProgress;
@@ -43,9 +43,9 @@ public class TileProvider {
         void onTileUpdated(Tile tile);
     }
 
-    TileProvider(Context context, Callback callback, SyncPoint currentCoordinates, MapType mapType) {
+    TileProvider(Context context, Callback callback, ScrollController currentCoordinates, MapType mapType) {
         this.callback = callback;
-        this.currentCoordinates = currentCoordinates;
+        this.scrollController = currentCoordinates;
         this.mapType = mapType;
 
         BitmapPool bitmapPool = new BitmapPool();
@@ -97,7 +97,7 @@ public class TileProvider {
                     return;
                 }
 
-                if (!needDraw(tile, currentCoordinates.get())) {
+                if (!needDraw(tile, scrollController.getCurrentCoordinates())) {
                     planned.remove(tile);
 //                    Log.i(TAG, "Cancel tile request - not need to draw");
                     return;
@@ -120,7 +120,7 @@ public class TileProvider {
 
                 if (bitmap != null) {
                     memoryCache.put(tile, bitmap);
-                    if (needDraw(tile, currentCoordinates.get())) {
+                    if (needDraw(tile, scrollController.getCurrentCoordinates())) {
                         callback.onTileUpdated(tile);
                     }
                 }
@@ -144,7 +144,7 @@ public class TileProvider {
     }
 
     public Point getCurrentCoordinates() {
-        return currentCoordinates.get();
+        return scrollController.getCurrentCoordinates();
     }
 
     public boolean needDraw(Tile tile, Point current) {

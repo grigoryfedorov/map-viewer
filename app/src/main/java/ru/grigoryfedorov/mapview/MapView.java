@@ -8,10 +8,8 @@ import android.graphics.Rect;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.OverScroller;
 
 
 public class MapView extends View implements TileProvider.Callback {
@@ -20,13 +18,10 @@ public class MapView extends View implements TileProvider.Callback {
     private static final int ZOOM = 16;
     private static final Rect MAP_BORDERS_DEFAULT = new Rect(33198, 22539, 33248, 22589);
 
-    private GestureDetector gestureDetector;
     private TileProvider tileProvider;
 
     private int tilesCountX;
     private int tilesCountY;
-
-    private OverScroller scroller;
 
     private int tileWidth;
     private int tileHeight;
@@ -34,8 +29,7 @@ public class MapView extends View implements TileProvider.Callback {
 
     private Rect bitmapRect;
     private Rect screenRect;
-    private SyncPoint currentCoordinatesInPixels;
-    private Rect borders;
+    private ScrollController scrollController;
 
     public MapView(Context context) {
         this(context, null, 0);
@@ -53,58 +47,32 @@ public class MapView extends View implements TileProvider.Callback {
         tileWidth = mapType.getTileWidth();
         tileHeight = mapType.getTileHeight();
 
+        bitmapRect = new Rect(0, 0, tileWidth, tileHeight);
+
+        scrollController = createScrollController(context);
+        tileProvider = new TileProvider(getContext(), this, scrollController, mapType);
+    }
+
+    private ScrollController createScrollController(Context context) {
+        ScrollController scrollController = new ScrollControllerImpl(context);
+
         Rect mapBorders = MAP_BORDERS_DEFAULT;
 
-        borders = new Rect(mapBorders.left * tileWidth,
+        Rect mapBordersInPixels = new Rect(mapBorders.left * tileWidth,
                 mapBorders.top * tileHeight,
                 mapBorders.right * tileWidth,
                 mapBorders.bottom * tileHeight);
 
-        currentCoordinatesInPixels = new SyncPoint(borders.centerX(), borders.centerY());
-
-        tileProvider = new TileProvider(getContext(), this, currentCoordinatesInPixels, mapType);
-
-
-
-        bitmapRect = new Rect(0, 0, tileWidth, tileHeight);
-
-        scroller = new OverScroller(context);
-
-        gestureDetector = new GestureDetector(context, new GestureDetector.SimpleOnGestureListener() {
+        scrollController.setGlobalBorders(mapBordersInPixels);
+        scrollController.setCurrentCoordinates(mapBordersInPixels.centerX(), mapBordersInPixels.centerY());
+        scrollController.setInvalidateListener(new InvalidateListener() {
             @Override
-            public boolean onDown(MotionEvent e) {
-                scroller.forceFinished(true);
+            public void onInvalidateNeeded() {
                 invalidate();
-
-                return true;
-            }
-
-            @Override
-            public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
-                Point current = currentCoordinatesInPixels.get();
-
-                boolean isSpringBack = scroller.springBack(current.x + (int)distanceX, current.y + (int)distanceY, borders.left, borders.right, borders.top, borders.bottom);
-
-                if (!isSpringBack) {
-                    currentCoordinatesInPixels.offset((int)distanceX, (int)distanceY);
-                }
-
-                invalidate();
-
-                return true;
-            }
-
-            @Override
-            public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-                Point current = currentCoordinatesInPixels.get();
-                scroller.fling(current.x, current.y, (int)-velocityX, (int)-velocityY,
-                        borders.left, borders.right, borders.top, borders.bottom, screenRect.width() / 2, screenRect.height() / 2);
-
-                invalidate();
-                return true;
             }
         });
 
+        return scrollController;
     }
 
     @Override
@@ -118,6 +86,8 @@ public class MapView extends View implements TileProvider.Callback {
 
         tileProvider.onSizeChanged(tilesCountX, tilesCountY);
 
+        scrollController.setOverFling(w / 2, h / 2);
+
         Log.d(TAG, "onSizeChanged w " + w + " h " + h + " oldw " + oldw + " oldh " + oldh + " tile count " + tilesCountX + " x " + tilesCountY);
 
     }
@@ -128,7 +98,7 @@ public class MapView extends View implements TileProvider.Callback {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        return gestureDetector.onTouchEvent(event);
+        return scrollController.onTouchEvent(event);
     }
 
     @Override
@@ -138,12 +108,9 @@ public class MapView extends View implements TileProvider.Callback {
 
     @Override
     protected void onDraw(Canvas canvas) {
-        if (scroller.computeScrollOffset()) {
-            currentCoordinatesInPixels.set(scroller.getCurrX(), scroller.getCurrY());
-            invalidate();
-        }
+        scrollController.onDraw();
 
-        Point current = currentCoordinatesInPixels.get();
+        Point current = scrollController.getCurrentCoordinates();
 
         int tileX = current.x / tileWidth;
         int tileY = current.y / tileHeight;
