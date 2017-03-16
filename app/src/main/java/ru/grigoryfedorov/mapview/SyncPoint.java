@@ -9,6 +9,10 @@ public class SyncPoint {
 
     private final Object lock = new Object();
 
+    public SyncPoint(int x, int y) {
+        this.point = new Point(x, y);
+    }
+
     public SyncPoint(Point point) {
         this.point = point;
     }
