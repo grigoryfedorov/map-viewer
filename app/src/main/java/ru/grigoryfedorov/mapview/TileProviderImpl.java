@@ -67,7 +67,7 @@ public class TileProviderImpl implements TileProvider {
     @Override
     public void setVisibleTileCount(int count) {
         memoryCache.resize(count);
-        executorService = Executors.newFixedThreadPool(count);
+        executorService = Executors.newFixedThreadPool(count / 4 + 1);
     }
 
     @Override
