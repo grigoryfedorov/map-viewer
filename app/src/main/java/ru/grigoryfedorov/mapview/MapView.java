@@ -15,12 +15,7 @@ import android.view.View;
 public class MapView extends View {
     private static final String TAG = MapView.class.getSimpleName();
 
-    private static final int ZOOM = 16;
     private static final Rect MAP_BORDERS_DEFAULT = new Rect(33198, 22539, 33248, 22589);
-
-    private int tileWidth;
-    private int tileHeight;
-
 
     private ScrollController scrollController;
     private TileDrawer tileDrawer;
@@ -36,13 +31,14 @@ public class MapView extends View {
 
     public MapView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+    }
 
-        MapType mapType = MapType.OSM_CYCLE;
+    public void setMapType(MapType mapType) {
+        init(mapType);
+    }
 
-        tileWidth = mapType.getTileWidth();
-        tileHeight = mapType.getTileHeight();
-
-        scrollController = createScrollController(context);
+    private void init(MapType mapType) {
+        scrollController = createScrollController(mapType);
 
         tileVisibilityChecker = new TileVisibilityChecker(mapType, scrollController);
 
@@ -54,19 +50,19 @@ public class MapView extends View {
             }
         });
 
-        tileDrawer = new TileDrawer(tileWidth, tileHeight, ZOOM);
+        tileDrawer = new TileDrawer(mapType);
         tileDrawer.setTileProvider(tileProvider);
     }
 
-    private ScrollController createScrollController(Context context) {
-        ScrollController scrollController = new ScrollControllerImpl(context);
+    private ScrollController createScrollController(MapType mapType) {
+        ScrollController scrollController = new ScrollControllerImpl(getContext());
 
         Rect mapBorders = MAP_BORDERS_DEFAULT;
 
-        Rect mapBordersInPixels = new Rect(mapBorders.left * tileWidth,
-                mapBorders.top * tileHeight,
-                mapBorders.right * tileWidth,
-                mapBorders.bottom * tileHeight);
+        Rect mapBordersInPixels = new Rect(mapBorders.left * mapType.getTileWidth(),
+                mapBorders.top * mapType.getTileHeight(),
+                mapBorders.right * mapType.getTileWidth(),
+                mapBorders.bottom * mapType.getTileHeight());
 
         scrollController.setGlobalBorders(mapBordersInPixels);
         scrollController.setCurrentCoordinates(mapBordersInPixels.centerX(), mapBordersInPixels.centerY());

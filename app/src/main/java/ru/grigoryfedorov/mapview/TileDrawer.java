@@ -17,10 +17,10 @@ public class TileDrawer {
 
     private TileProvider tileProvider;
 
-    public TileDrawer(int tileWidth, int tileHeight, int zoom) {
-        this.tileWidth = tileWidth;
-        this.tileHeight = tileHeight;
-        this.zoom = zoom;
+    public TileDrawer(MapType mapType) {
+        this.tileWidth = mapType.getTileWidth();
+        this.tileHeight = mapType.getTileHeight();
+        this.zoom = mapType.getZoom();
 
         bitmapRect = new Rect(0, 0, tileWidth, tileHeight);
     }

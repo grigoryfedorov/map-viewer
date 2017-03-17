@@ -12,11 +12,13 @@ public class MapType {
     private int i;
     private final Object lock = new Object();
 
+    private static final int DEFAULT_ZOOM = 16;
     public static final int DEFAULT_TILE_SIZE = 256;
 
     public static final MapType OSM_CYCLE = new MapType("tile.opencyclemap.org/cycle", new String[]{"a", "b", "c"});
     public static final MapType OSM = new MapType("tile.openstreetmap.org", new String[]{"a", "b", "c"});
     public static final MapType OPEN_RAIL_WAY = new MapType("tiles.openrailwaymap.org/standard", new String[]{"a", "b", "c"}, 512, 512);
+    private int zoom;
 
     public MapType(String baseUrl, String[] subDomains) {
         this(baseUrl, subDomains, DEFAULT_TILE_SIZE, DEFAULT_TILE_SIZE);
@@ -27,6 +29,7 @@ public class MapType {
         this.subDomains = subDomains;
         this.tileWidth = tileWidth;
         this.tileHeight = tileHeight;
+        this.zoom = DEFAULT_ZOOM;
     }
 
     public int getTileWidth() {
@@ -51,4 +54,7 @@ public class MapType {
     }
 
 
+    public int getZoom() {
+        return zoom;
+    }
 }

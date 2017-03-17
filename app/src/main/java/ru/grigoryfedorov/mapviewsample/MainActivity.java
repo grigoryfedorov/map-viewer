@@ -5,6 +5,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.view.WindowManager;
 
+import ru.grigoryfedorov.mapview.MapType;
+import ru.grigoryfedorov.mapview.MapView;
 import ru.grigoryfedorov.mapview.R;
 
 
@@ -14,6 +16,9 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        MapView mapView = (MapView) findViewById(R.id.map_view);
+        mapView.setMapType(MapType.OSM_CYCLE);
 
         setStatusBarTranslucent();
     }
