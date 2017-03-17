@@ -2,40 +2,42 @@ package ru.grigoryfedorov.mapview.cache.memory;
 
 
 import android.graphics.Bitmap;
-import android.graphics.Point;
+import android.graphics.Rect;
 import android.support.annotation.Nullable;
 
 import java.util.concurrent.ConcurrentHashMap;
 
 import ru.grigoryfedorov.mapview.Tile;
-import ru.grigoryfedorov.mapview.TileVisibilityChecker;
 import ru.grigoryfedorov.mapview.pool.BitmapPoolConsumer;
 
 public class VisibleMemoryCache implements MemoryCache {
 
 
-    private final TileVisibilityChecker tileVisibilityChecker;
     private BitmapPoolConsumer bitmapPoolConsumer;
 
     private ConcurrentHashMap<Tile, Bitmap> map;
 
-    public VisibleMemoryCache(TileVisibilityChecker tileVisibilityChecker) {
+    public VisibleMemoryCache() {
         map = new ConcurrentHashMap<>();
-        this.tileVisibilityChecker = tileVisibilityChecker;
     }
 
     @Override
     public void put(Tile tile, Bitmap bitmap) {
-        map.put(tile, bitmap);
-
-        reuseInvisibleBitmaps();
+        put(tile, bitmap, null);
     }
 
-    private void reuseInvisibleBitmaps() {
-        Point point = tileVisibilityChecker.get();
+    @Override
+    public void put(Tile tile, Bitmap bitmap, @Nullable Rect tileVisibleRect) {
+        map.put(tile, bitmap);
 
+        if (tileVisibleRect != null) {
+            reuseInvisibleBitmaps(tileVisibleRect);
+        }
+    }
+
+    private void reuseInvisibleBitmaps(Rect visibleTileRectangle) {
         for (Tile cachedTile : map.keySet()) {
-            if (!tileVisibilityChecker.needDraw(cachedTile, point)) {
+            if (!visibleTileRectangle.contains(cachedTile.getX(), cachedTile.getY())) {
                 Bitmap bitmapToReuse = map.remove(cachedTile);
                 bitmapPoolConsumer.add(bitmapToReuse);
             }
@@ -50,7 +52,6 @@ public class VisibleMemoryCache implements MemoryCache {
 
     @Override
     public void resize(int size) {
-
     }
 
     @Override

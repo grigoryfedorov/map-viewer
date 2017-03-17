@@ -2,6 +2,7 @@ package ru.grigoryfedorov.mapview.cache.memory;
 
 
 import android.graphics.Bitmap;
+import android.graphics.Rect;
 import android.support.annotation.Nullable;
 import android.util.Log;
 import android.util.LruCache;
@@ -21,6 +22,11 @@ public class AndroidLruMemoryCache implements MemoryCache {
     @Override
     public void put(Tile tile, Bitmap bitmap) {
         tiles.put(tile, bitmap);
+    }
+
+    @Override
+    public void put(Tile tile, Bitmap bitmap, @Nullable Rect tileVisibleRect) {
+        put(tile, bitmap);
     }
 
     @Override

@@ -43,7 +43,7 @@ public class TileProviderImpl implements TileProvider {
 
         BitmapPool bitmapPool = new BitmapPool();
 
-        memoryCache = new VisibleMemoryCache(tileVisibilityChecker);
+        memoryCache = new VisibleMemoryCache();
         memoryCache.setBitmapPoolConsumer(bitmapPool);
 
         persistentCache = new FileCache(context);
@@ -121,7 +121,7 @@ public class TileProviderImpl implements TileProvider {
                 }
 
                 if (bitmap != null) {
-                    memoryCache.put(tile, bitmap);
+                    memoryCache.put(tile, bitmap, tileVisibilityChecker.getVisibleTileRectangle());
                     if (tileVisibilityChecker.needDraw(tile)) {
                         invalidateListener.onInvalidateNeeded();
                     }

@@ -2,6 +2,7 @@ package ru.grigoryfedorov.mapview.cache.memory;
 
 
 import android.graphics.Bitmap;
+import android.graphics.Rect;
 import android.support.annotation.Nullable;
 
 import java.util.LinkedHashMap;
@@ -47,6 +48,11 @@ public class LinkedMapLruMemoryCache implements MemoryCache {
         synchronized (lock) {
             map.put(tile, bitmap);
         }
+    }
+
+    @Override
+    public void put(Tile tile, Bitmap bitmap, @Nullable Rect tileVisibleRect) {
+        put(tile, bitmap);
     }
 
     @Nullable

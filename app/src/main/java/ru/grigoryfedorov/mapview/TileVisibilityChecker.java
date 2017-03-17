@@ -2,6 +2,7 @@ package ru.grigoryfedorov.mapview;
 
 
 import android.graphics.Point;
+import android.graphics.Rect;
 
 public class TileVisibilityChecker {
     private CoordinatesProvider coordinatesProvider;
@@ -19,6 +20,15 @@ public class TileVisibilityChecker {
         tileHeight = mapType.getTileHeight();
     }
 
+    public Rect getVisibleTileRectangle() {
+        Point current = coordinatesProvider.getCurrentCoordinates();
+
+        int startTileX = current.x / tileWidth;
+        int startTileY = current.y / tileHeight;
+
+        return new Rect(startTileX, startTileY, startTileX + tilesCountX, startTileY + tilesCountY);
+    }
+
     /**
      * Check if tile currently visible on the screen
      *
@@ -28,29 +38,7 @@ public class TileVisibilityChecker {
      * @return true if need to draw
      */
     public boolean needDraw(Tile tile) {
-        Point current = coordinatesProvider.getCurrentCoordinates();
-
-        int startTileX = current.x / tileWidth;
-        int startTileY = current.y / tileHeight;
-
-        return tile.getX() >= startTileX
-                && tile.getX() < startTileX + tilesCountX
-                && tile.getY() >= startTileY
-                && tile.getY() < startTileY + tilesCountY;
-    }
-
-    public Point get() {
-        return coordinatesProvider.getCurrentCoordinates();
-    }
-
-    public boolean needDraw(Tile tile, Point current) {
-        int startTileX = current.x / tileWidth;
-        int startTileY = current.y / tileHeight;
-
-        return tile.getX() >= startTileX
-                && tile.getX() < startTileX + tilesCountX
-                && tile.getY() >= startTileY
-                && tile.getY() < startTileY + tilesCountY;
+        return getVisibleTileRectangle().contains(tile.getX(), tile.getY());
     }
 
     public void setScreenSize(int width, int height) {
