@@ -8,31 +8,36 @@ import android.support.annotation.Nullable;
 import java.util.concurrent.ConcurrentHashMap;
 
 import ru.grigoryfedorov.mapview.Tile;
-import ru.grigoryfedorov.mapview.TileProvider;
+import ru.grigoryfedorov.mapview.TileVisibilityChecker;
 import ru.grigoryfedorov.mapview.pool.BitmapPoolConsumer;
 
 public class VisibleMemoryCache implements MemoryCache {
 
 
-    private final TileProvider tileProvider;
+    private final TileVisibilityChecker tileVisibilityChecker;
     private BitmapPoolConsumer bitmapPoolConsumer;
 
     private ConcurrentHashMap<Tile, Bitmap> map;
 
-    public VisibleMemoryCache(TileProvider tileProvider) {
+    public VisibleMemoryCache(TileVisibilityChecker tileVisibilityChecker) {
         map = new ConcurrentHashMap<>();
-        this.tileProvider = tileProvider;
+        this.tileVisibilityChecker = tileVisibilityChecker;
     }
 
     @Override
     public void put(Tile tile, Bitmap bitmap) {
         map.put(tile, bitmap);
 
-        Point current = tileProvider.getCurrentCoordinates();
+        reuseInvisibleBitmaps();
+    }
+
+    private void reuseInvisibleBitmaps() {
+        Point point = tileVisibilityChecker.get();
 
         for (Tile cachedTile : map.keySet()) {
-            if (!tileProvider.needDraw(cachedTile, current)) {
-                bitmapPoolConsumer.add(map.remove(cachedTile));
+            if (!tileVisibilityChecker.needDraw(cachedTile, point)) {
+                Bitmap bitmapToReuse = map.remove(cachedTile);
+                bitmapPoolConsumer.add(bitmapToReuse);
             }
         }
     }

@@ -1,7 +1,6 @@
 package ru.grigoryfedorov.mapview;
 
 
-import android.graphics.Point;
 import android.graphics.Rect;
 import android.view.MotionEvent;
 import android.view.View;
@@ -12,7 +11,7 @@ import android.view.View;
  * Used to move screen view port in global coordinates.
  *
  */
-interface ScrollController {
+interface ScrollController extends CoordinatesProvider {
 
     /**
      * Set global borders in pixels.
@@ -58,12 +57,4 @@ interface ScrollController {
      * Call it in your {@link View#onDraw(android.graphics.Canvas)} to calculate animated scroll
      */
     void onDraw();
-
-    /**
-     * Get current global coordinates scrolled after touch events
-     *
-     * @return current global coordinates
-     */
-    Point getCurrentCoordinates();
-
 }
