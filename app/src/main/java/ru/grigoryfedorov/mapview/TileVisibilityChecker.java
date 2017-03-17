@@ -29,14 +29,6 @@ public class TileVisibilityChecker {
         return new Rect(startTileX, startTileY, startTileX + tilesCountX, startTileY + tilesCountY);
     }
 
-    /**
-     * Check if tile currently visible on the screen
-     *
-     * This method must be thread safe
-     *
-     * @param tile tile to check
-     * @return true if need to draw
-     */
     public boolean needDraw(Tile tile) {
         return getVisibleTileRectangle().contains(tile.getX(), tile.getY());
     }

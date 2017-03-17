@@ -1,6 +1,7 @@
 package ru.grigoryfedorov.mapviewsample;
 
 import android.app.Activity;
+import android.graphics.Rect;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.WindowManager;
@@ -18,7 +19,14 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
 
         MapView mapView = (MapView) findViewById(R.id.map_view);
-        mapView.setMapType(MapType.OSM_CYCLE);
+
+        int leftX = 33150;
+        int topY = 22493;
+        int rectSize = 100;
+
+        Rect mapBorders = new Rect(leftX, topY, leftX + rectSize, topY + rectSize);
+
+        mapView.setMap(MapType.OSM_CYCLE, mapBorders);
 
         setStatusBarTranslucent();
     }

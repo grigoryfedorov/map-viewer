@@ -15,8 +15,6 @@ import android.view.View;
 public class MapView extends View {
     private static final String TAG = MapView.class.getSimpleName();
 
-    private static final Rect MAP_BORDERS_DEFAULT = new Rect(33198, 22539, 33248, 22589);
-
     private ScrollController scrollController;
     private TileDrawer tileDrawer;
     private TileVisibilityChecker tileVisibilityChecker;
@@ -33,12 +31,12 @@ public class MapView extends View {
         super(context, attrs, defStyleAttr);
     }
 
-    public void setMapType(MapType mapType) {
-        init(mapType);
+    public void setMap(MapType mapType, Rect mapBorders) {
+        init(mapType, mapBorders);
     }
 
-    private void init(MapType mapType) {
-        scrollController = createScrollController(mapType);
+    private void init(MapType mapType, Rect mapBorders) {
+        scrollController = createScrollController(mapType, mapBorders);
 
         tileVisibilityChecker = new TileVisibilityChecker(mapType, scrollController);
 
@@ -54,10 +52,8 @@ public class MapView extends View {
         tileDrawer.setTileProvider(tileProvider);
     }
 
-    private ScrollController createScrollController(MapType mapType) {
+    private ScrollController createScrollController(MapType mapType, Rect mapBorders) {
         ScrollController scrollController = new ScrollControllerImpl(getContext());
-
-        Rect mapBorders = MAP_BORDERS_DEFAULT;
 
         Rect mapBordersInPixels = new Rect(mapBorders.left * mapType.getTileWidth(),
                 mapBorders.top * mapType.getTileHeight(),

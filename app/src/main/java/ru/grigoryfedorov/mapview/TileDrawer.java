@@ -47,8 +47,6 @@ public class TileDrawer {
 
 
             for (int y = 0; y < tilesCountY; y++) {
-
-
                 bitmapRect.offset(0, tileHeight);
 
                 Bitmap bitmap = tileProvider.getTile(Tile.getTile(zoom, tileX, tileY + y));
