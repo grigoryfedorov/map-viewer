@@ -36,29 +36,31 @@ public class TileDrawer {
 
         Rect clipBounds = canvas.getClipBounds();
 
-        int offsetX = -(current.x % tileWidth);
-        int offsetY = -(current.y % tileHeight);
+        int offsetX = -(current.x % tileWidth) - tileWidth;
+        int offsetY = -(current.y % tileHeight) - tileHeight;
 
         bitmapRect.offsetTo(offsetX, offsetY);
 
         for (int x = 0; x < tilesCountX; x++) {
 
             bitmapRect.offsetTo(offsetX + x * tileWidth, offsetY - tileHeight);
-            tileX++;
+
 
             for (int y = 0; y < tilesCountY; y++) {
 
 
                 bitmapRect.offset(0, tileHeight);
 
+                Bitmap bitmap = tileProvider.getTile(Tile.getTile(zoom, tileX, tileY + y));
+
                 if (!Rect.intersects(clipBounds, bitmapRect)) {
                     continue;
                 }
 
-                Bitmap bitmap = tileProvider.getTile(Tile.getTile(zoom, tileX, tileY + y));
-
                 canvas.drawBitmap(bitmap, null, bitmapRect, null);
             }
+
+            tileX++;
         }
     }
 
