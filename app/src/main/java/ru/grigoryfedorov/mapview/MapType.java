@@ -41,7 +41,7 @@ public class MapType {
     }
 
     public String getTileRequestUrl(Tile tile) {
-        return String.format(Locale.US, "http://%s.%s/%d/%d/%d.png",
+        return String.format(Locale.US, "https://%s.%s/%d/%d/%d.png",
                 getSubDomain(), baseUrl, tile.getZoom(), tile.getX(), tile.getY());
     }
 

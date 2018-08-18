@@ -26,7 +26,7 @@ public class MainActivity extends Activity {
 
         Rect mapBorders = new Rect(leftX, topY, leftX + rectSize, topY + rectSize);
 
-        mapView.setMap(MapType.OSM_CYCLE, mapBorders);
+        mapView.setMap(MapType.OSM, mapBorders);
 
         setStatusBarTranslucent();
     }
